@@ -1,7 +1,35 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MIndexer.Core", "MIndexer.Core\MIndexer.Core.csproj", "{0EDBA016-36EC-4772-8ED3-302AC9D69953}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MIndexer.Tests", "MIndexer.Tests\MIndexer.Tests.csproj", "{D37E2418-ABF0-40FD-83AA-8A8039371097}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lib", "Lib", "{0E44456B-D153-4684-BE75-C2CACC496909}"
+	ProjectSection(SolutionItems) = preProject
+		Lib\ID3Sharp.dll = Lib\ID3Sharp.dll
+		Lib\ID3Sharp.pdb = Lib\ID3Sharp.pdb
+		Lib\log4net.dll = Lib\log4net.dll
+		Lib\log4net.xml = Lib\log4net.xml
+		Lib\Sciendo.Common.dll = Lib\Sciendo.Common.dll
+		Lib\Sciendo.Common.pdb = Lib\Sciendo.Common.pdb
+	EndProjectSection
+EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0EDBA016-36EC-4772-8ED3-302AC9D69953}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EDBA016-36EC-4772-8ED3-302AC9D69953}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EDBA016-36EC-4772-8ED3-302AC9D69953}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EDBA016-36EC-4772-8ED3-302AC9D69953}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D37E2418-ABF0-40FD-83AA-8A8039371097}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D37E2418-ABF0-40FD-83AA-8A8039371097}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D37E2418-ABF0-40FD-83AA-8A8039371097}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D37E2418-ABF0-40FD-83AA-8A8039371097}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
