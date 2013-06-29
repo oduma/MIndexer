@@ -7,7 +7,7 @@ namespace MIndexer.Core
 {
     public class FileProcessor
     {
-        public void ProcessTheMFile(string filePath, MFileIndexer fileindexer)
+        public void ProcessTheMFile(string filePath, MFileIndexerSearcher fileindexer)
         {
             //index the m file
 
