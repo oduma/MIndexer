@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using Lucene.Net.Index;
 using MIndexer.Core;
+using Moq;
 using NUnit.Framework;
 using System.Collections.Generic;
 
@@ -18,6 +18,9 @@ namespace MIndexer.Tests
         public void SetUp()
         {
             _actualFileNames=new List<string>();
+            var oldFiles = Directory.GetFiles("Lyrics", "*.lyrics");
+            foreach(string oldFile in oldFiles)
+                File.Delete(oldFile);
         }
 
         [TearDown]
@@ -77,6 +80,52 @@ namespace MIndexer.Tests
             Assert.IsNotNull(results);
             Assert.AreEqual(1,results.Count);
             Assert.True(results.Contains(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Data\01-Hells Bells.mp3")));
+        }
+
+        [Test]
+        public void BuildIndexOnFolder_Processing_Full_WrongUrl()
+        {
+            _indexer = new Indexer("Data");
+            _indexer._downloaderHelper = GetMockDownloaderHelper();
+            _indexer.BuildIndexOnFolder(new List<Action<string>> { _indexer.IndexAnMFile,_indexer.RetrieveLyricsForAnMFile });
+
+            MFileIndexerSearcher mFileIndexerSearcher = new MFileIndexerSearcher();
+            var results = mFileIndexerSearcher.Search("Hel*", 40).ToList();
+            Assert.IsNotNull(results);
+            Assert.AreEqual(1, results.Count);
+            Assert.True(results.Contains(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Data\01-Hells Bells.mp3")));
+            Assert.False(File.Exists(@"Lyrics\01-Hells Bells.lyrics"));
+        }
+
+        private DownloaderHelper GetMockDownloaderHelper()
+        {
+            Mock<DownloaderHelper> mock = new Mock<DownloaderHelper>();
+            mock.Setup(m => m.DownloadLyrics("wrongurl")).Returns(string.Empty);
+            return mock.Object;
+        }
+
+        [Test]
+        public void BuildIndexOnFolder_Processing_Full_NoTag()
+        {
+            _indexer = new Indexer("DataNoTag");
+            _indexer._downloaderHelper = GetMockDownloaderHelper();
+            _indexer.BuildIndexOnFolder(new List<Action<string>> { _indexer.IndexAnMFile, _indexer.RetrieveLyricsForAnMFile });
+
+            Assert.False(File.Exists(@"Lyrics\Dance 1.lyrics"));
+
+        }
+        [Test]
+        public void BuildIndexOnFolder_Processing_Full_Ok()
+        {
+            _indexer = new Indexer("Data");
+            _indexer.BuildIndexOnFolder(new List<Action<string>> { _indexer.IndexAnMFile, _indexer.RetrieveLyricsForAnMFile });
+
+            MFileIndexerSearcher mFileIndexerSearcher = new MFileIndexerSearcher();
+            var results = mFileIndexerSearcher.Search("Hel*", 40).ToList();
+            Assert.IsNotNull(results);
+            Assert.AreEqual(1, results.Count);
+            Assert.True(results.Contains(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Data\01-Hells Bells.mp3")));
+            Assert.True(File.Exists(@"Lyrics\01-Hells Bells.lyrics"));
         }
     }
 }

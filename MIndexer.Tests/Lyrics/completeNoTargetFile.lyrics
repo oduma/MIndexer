@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Lyrics>
+  <Content>my own content</Content>
+  <TargetFileName>Data\nonexsitentfile.txt</TargetFileName>
+</Lyrics>

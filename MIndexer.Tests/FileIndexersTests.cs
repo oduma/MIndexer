@@ -41,27 +41,54 @@ namespace MIndexer.Tests
         [Test]
         public void LFile_PrepareDocumentOk()
         {
-            Assert.Fail();
+            LFileIndexerSearcher lFileIndexer = new LFileIndexerSearcher();
+            var document = lFileIndexer.PrepareDocument(@"Lyrics\01-Hells Bells.lyrics");
+            Assert.IsNotNull(document);
+            Assert.AreEqual(@"I am not sure about the lyrics but I have a clue", document.GetField("tagged").StringValue);
+            Assert.AreEqual(@"Data\01-Hells Bells.mp3", document.GetField("filename").StringValue);
         }
         [Test]
+        [ExpectedException(typeof(ArgumentNullException))]
         public void LFile_PrepareDocument_NoFilePath()
         {
-            Assert.Fail();
+            LFileIndexerSearcher lFileIndexer = new LFileIndexerSearcher();
+            lFileIndexer.PrepareDocument(null);
         }
         [Test]
+        [ExpectedException(typeof(ArgumentException))]
         public void LFile_PrepareDocumentFileNotFound()
         {
-            Assert.Fail();
+            LFileIndexerSearcher lFileIndexer = new LFileIndexerSearcher();
+            lFileIndexer.PrepareDocument("nonexistent.file");
         }
         [Test]
-        public void LFile_PrepareDocument_NoTargetFilePath()
+        [ExpectedException(typeof(ArgumentException))]
+        public void LFile_PrepareDocument_WrongType()
         {
-            Assert.Fail();
+            LFileIndexerSearcher lFileIndexer = new LFileIndexerSearcher();
+            lFileIndexer.PrepareDocument(@"Lyrics\wrongfiletype.lyrics");
         }
         [Test]
+        [ExpectedException(typeof(ArgumentException))]
+        public void LFile_PrepareDocumentContentNotFound()
+        {
+            LFileIndexerSearcher lFileIndexer = new LFileIndexerSearcher();
+            lFileIndexer.PrepareDocument(@"Lyrics\incompleteNoContent.lyrics");
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentException))]
         public void LFile_PrepareDocumentTargetFileNotFound()
         {
-            Assert.Fail();
+            LFileIndexerSearcher lFileIndexer = new LFileIndexerSearcher();
+            lFileIndexer.PrepareDocument(@"Lyrics\incompleteNoTargetFile.lyrics");
+        }
+        [Test]
+        [ExpectedException(typeof(ArgumentException))]
+        public void LFile_PrepareDocumentTagretFileNotExists()
+        {
+            LFileIndexerSearcher lFileIndexer = new LFileIndexerSearcher();
+            lFileIndexer.PrepareDocument(@"Lyrics\completeNoTargetFile.lyrics");
         }
 
     }

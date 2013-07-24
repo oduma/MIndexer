@@ -18,7 +18,7 @@ namespace MIndexer.Core
     {
         readonly static SimpleFSLockFactory _lockFactory = new SimpleFSLockFactory();
 
-        public Document PrepareDocument(string filePath, string targetFilePath=null)
+        public Document PrepareDocument(string filePath)
         {
             if(string.IsNullOrEmpty(filePath))
                 throw new ArgumentNullException("filePath");

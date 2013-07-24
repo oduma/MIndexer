@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Linq;
 using ID3Sharp;
@@ -8,7 +7,6 @@ using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Index;
 using Lucene.Net.Store;
 using MIndexer.Core.DataTypes;
-using MIndexer.Core.Interfaces;
 using Sciendo.Common.Logging;
 using Sciendo.Common.Serialization;
 using Directory = System.IO.Directory;
@@ -24,6 +22,7 @@ namespace MIndexer.Core
         private LuceneDirectory _indexDir;
         readonly static SimpleFSLockFactory _lockFactory = new SimpleFSLockFactory();
         private IndexWriter _writer;
+        internal DownloaderHelper _downloaderHelper;
 
         public Indexer(string folderName)
         {
@@ -40,6 +39,7 @@ namespace MIndexer.Core
                           IndexWriter.MaxFieldLength.UNLIMITED);
             _writer.SetMergePolicy(new LogDocMergePolicy(_writer));
             _writer.MergeFactor = 5;
+            _downloaderHelper = new DownloaderHelper();
 
         }
 
@@ -49,12 +49,12 @@ namespace MIndexer.Core
             if(processTheFile==null)
                 throw new ArgumentNullException("processTheFile");
  
-            IndexFolder(_dataFolder, processTheFile, _writer);
+            IndexFolder(_dataFolder, processTheFile);
             _writer.Optimize();
             _writer.Dispose();
         }
 
-        private void IndexFolder(DirectoryInfo currentFolder, List<Action<string>> processTheFile,IndexWriter writer)
+        private void IndexFolder(DirectoryInfo currentFolder, List<Action<string>> processTheFile)
         {
             var files = currentFolder.EnumerateFiles();
             if (files.Any())
@@ -63,7 +63,7 @@ namespace MIndexer.Core
                     foreach(var processingMethod in processTheFile)
                         processingMethod(file.FullName);
                 }
-            currentFolder.EnumerateDirectories().AsParallel().ForAll(f => IndexFolder(f, processTheFile,writer));
+            currentFolder.EnumerateDirectories().AsParallel().ForAll(f => IndexFolder(f, processTheFile));
         }
 
         public void StartMonitoringFolder()
@@ -124,8 +124,9 @@ namespace MIndexer.Core
                     var id3Tag = _mFileIndexer.GetID3Tag(filePath);
                     if (id3Tag == null)
                         return;
-                    DownloaderHelper downloaderHelper= new DownloaderHelper();
-                    lyrics.Content=downloaderHelper.DownloadLyrics(GetRelativeUrl(id3Tag));
+                    lyrics.Content=_downloaderHelper.DownloadLyrics(GetRelativeUrl(id3Tag));
+                    if (string.IsNullOrEmpty(lyrics.Content))
+                        return;
                     lyrics.TargetFileName = filePath;
                     Serializer.SerializeOneToFile(lyrics,
                                                   Path.Combine(Utils.GetFolderFromConfiguration("LyricsDir"),
@@ -134,7 +135,6 @@ namespace MIndexer.Core
                 catch (Exception ex)
                 {
                     LoggingManager.LogSciendoSystemError(ex);
-                    throw;
                 }
             }
             
@@ -144,7 +144,7 @@ namespace MIndexer.Core
         {
             if (!id3Tag.HasTitle || !id3Tag.HasArtist)
                 return null;
-            return string.Format("{0}/{1}-lyrics/", id3Tag.Artist.Replace(" ", "-"), id3Tag.Title.Replace(" ", "-"));
+            return string.Format("{0}/{1}-lyrics/", id3Tag.Artist.Replace(" ", "-").Replace("/",""), id3Tag.Title.Replace(" ", "-"));
         }
 
         public void Dispose()

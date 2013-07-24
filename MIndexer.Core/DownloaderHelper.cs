@@ -9,7 +9,7 @@ namespace MIndexer.Core
     {
         private readonly string rootUrl = "http://www.songlyrics.com/";
 
-        public string DownloadLyrics(string relativeUrl)
+        public virtual string DownloadLyrics(string relativeUrl)
         {
             string result= string.Empty;
             if(string.IsNullOrEmpty(relativeUrl))

@@ -5,7 +5,7 @@ namespace MIndexer.Core.Interfaces
 {
     public interface IFileIndexerSearcher
     {
-        Document PrepareDocument(string filePath, string targetFilePath=null);
+        Document PrepareDocument(string filePath);
 
         IEnumerable<string> Search(string query, int maxResults);
     }
