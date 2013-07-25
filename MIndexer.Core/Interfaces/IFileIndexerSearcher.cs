@@ -7,6 +7,6 @@ namespace MIndexer.Core.Interfaces
     {
         Document PrepareDocument(string filePath);
 
-        IEnumerable<string> Search(string query, int maxResults);
+        IEnumerable<string> Search(string query, int maxResults,string[] searchFields);
     }
 }

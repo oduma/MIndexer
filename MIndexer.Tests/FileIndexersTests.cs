@@ -42,7 +42,7 @@ namespace MIndexer.Tests
         public void LFile_PrepareDocumentOk()
         {
             LFileIndexerSearcher lFileIndexer = new LFileIndexerSearcher();
-            var document = lFileIndexer.PrepareDocument(@"Lyrics\01-Hells Bells.lyrics");
+            var document = lFileIndexer.PrepareDocument(@"Lyrics\01-Hells Bells.xml");
             Assert.IsNotNull(document);
             Assert.AreEqual(@"I am not sure about the lyrics but I have a clue", document.GetField("tagged").StringValue);
             Assert.AreEqual(@"Data\01-Hells Bells.mp3", document.GetField("filename").StringValue);
@@ -90,6 +90,5 @@ namespace MIndexer.Tests
             LFileIndexerSearcher lFileIndexer = new LFileIndexerSearcher();
             lFileIndexer.PrepareDocument(@"Lyrics\completeNoTargetFile.lyrics");
         }
-
     }
 }

@@ -76,7 +76,7 @@ namespace MIndexer.Tests
             _indexer.BuildIndexOnFolder(new List<Action<string>>{_indexer.IndexAnMFile});
 
             MFileIndexerSearcher mFileIndexerSearcher= new MFileIndexerSearcher();
-            var results = mFileIndexerSearcher.Search("Hel*", 40).ToList();
+            var results = mFileIndexerSearcher.Search("Hel*", 40,new string[]{"tagged"}).ToList();
             Assert.IsNotNull(results);
             Assert.AreEqual(1,results.Count);
             Assert.True(results.Contains(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Data\01-Hells Bells.mp3")));
@@ -90,7 +90,7 @@ namespace MIndexer.Tests
             _indexer.BuildIndexOnFolder(new List<Action<string>> { _indexer.IndexAnMFile,_indexer.RetrieveLyricsForAnMFile });
 
             MFileIndexerSearcher mFileIndexerSearcher = new MFileIndexerSearcher();
-            var results = mFileIndexerSearcher.Search("Hel*", 40).ToList();
+            var results = mFileIndexerSearcher.Search("Hel*", 40, new string[] { "tagged" }).ToList();
             Assert.IsNotNull(results);
             Assert.AreEqual(1, results.Count);
             Assert.True(results.Contains(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Data\01-Hells Bells.mp3")));
@@ -121,11 +121,26 @@ namespace MIndexer.Tests
             _indexer.BuildIndexOnFolder(new List<Action<string>> { _indexer.IndexAnMFile, _indexer.RetrieveLyricsForAnMFile });
 
             MFileIndexerSearcher mFileIndexerSearcher = new MFileIndexerSearcher();
-            var results = mFileIndexerSearcher.Search("Hel*", 40).ToList();
+            var results = mFileIndexerSearcher.Search("Hel*", 40, new string[] { "tagged" }).ToList();
             Assert.IsNotNull(results);
             Assert.AreEqual(1, results.Count);
             Assert.True(results.Contains(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Data\01-Hells Bells.mp3")));
             Assert.True(File.Exists(@"Lyrics\01-Hells Bells.lyrics"));
         }
+        [Test]
+        public void BuildIndexLyricsOnFolder_Processing_Full_Ok()
+        {
+            _indexer = new Indexer("Lyrics");
+            File.Copy(@"Lyrics\01-Hells Bells.xml", @"Lyrics\01-Hells Bells.lyrics",true);
+            _indexer.IndexAnLFile(@"Lyrics\01-Hells Bells.lyrics");
+
+            LFileIndexerSearcher lFileIndexerSearcher = new LFileIndexerSearcher();
+            var results = lFileIndexerSearcher.Search("lyr*", 40, new string[] { "targetfilename","tagged" }).ToList();
+            Assert.IsNotNull(results);
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(results[0], @"Data\01-Hells Bells.mp3");
+            Assert.True(File.Exists(@"Lyrics\01-Hells Bells.lyrics"));
+        }
+
     }
 }

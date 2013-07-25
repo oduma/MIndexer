@@ -72,9 +72,9 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="log4net.config" />
-    <None Include="Lyrics\01-Hells Bells.lyrics">
+    <Content Include="Lyrics\01-Hells Bells.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Content>
     <None Include="Lyrics\completeNoTargetFile.lyrics">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

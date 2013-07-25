@@ -7,6 +7,7 @@ using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Index;
 using Lucene.Net.Store;
 using MIndexer.Core.DataTypes;
+using MIndexer.Core.Interfaces;
 using Sciendo.Common.Logging;
 using Sciendo.Common.Serialization;
 using Directory = System.IO.Directory;
@@ -16,7 +17,9 @@ namespace MIndexer.Core
 {
     public class Indexer:IDisposable
     {
+        private Dictionary<string, IFileIndexerSearcher> _indexers;
         private MFileIndexerSearcher _mFileIndexer;
+        private LFileIndexerSearcher _lFileIndexer;
         private FSWatcher _fsWatcher;
         private DirectoryInfo _dataFolder;
         private LuceneDirectory _indexDir;
@@ -34,6 +37,7 @@ namespace MIndexer.Core
             var indexFolder = new DirectoryInfo(Utils.GetFolderFromConfiguration("IndexDir"));
             _indexDir = FSDirectory.Open(indexFolder, _lockFactory);
             _mFileIndexer= new MFileIndexerSearcher();
+            _lFileIndexer= new LFileIndexerSearcher();
             _writer = new IndexWriter(_indexDir, new StandardAnalyzer(
                           Lucene.Net.Util.Version.LUCENE_30),
                           IndexWriter.MaxFieldLength.UNLIMITED);
@@ -95,8 +99,28 @@ namespace MIndexer.Core
             {
                 try
                 {
-                    if(_mFileIndexer.Search("filename:" +filePath.Replace("\\","").Substring(filePath.IndexOf(Path.VolumeSeparatorChar)+1) ,1).Count()<=0)
+                    if(_mFileIndexer.Search("filename:" +filePath.Replace("\\","/").Replace(" ","").Substring(filePath.IndexOf(Path.VolumeSeparatorChar)+1) ,1,new []{"filename"}).Count()<=0)
                         _writer.AddDocument(_mFileIndexer.PrepareDocument(filePath));
+                }
+                catch (Exception ex)
+                {
+                    LoggingManager.LogSciendoSystemError(ex);
+                    throw;
+                }
+            }
+        }
+
+        public void IndexAnLFile(string filePath)
+        {
+            if (!File.Exists(filePath))
+                throw new ArgumentNullException("filePath");
+
+            if (Path.GetExtension(filePath) == ".lyrics")
+            {
+                try
+                {
+                    if (_lFileIndexer.Search("filename:" + filePath.Replace("\\", "/").Replace(" ","").Substring(filePath.IndexOf(Path.VolumeSeparatorChar) + 1), 1,new string[]{"filename"}).Count() <= 0)
+                        _writer.AddDocument(_lFileIndexer.PrepareDocument(filePath));
                 }
                 catch (Exception ex)
                 {
