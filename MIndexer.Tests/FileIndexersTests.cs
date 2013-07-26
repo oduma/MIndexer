@@ -14,7 +14,7 @@ namespace MIndexer.Tests
             var document = mFileIndexer.PrepareDocument(@"Data\01-Hells Bells.mp3");
             Assert.IsNotNull(document);
             Assert.AreEqual("AC/DC Back In Black Hells Bells Hard Rock", document.GetField("tagged").StringValue);
-            Assert.AreEqual(@"Data\01-Hells Bells.mp3",document.GetField("filename").StringValue);
+            Assert.AreEqual(@"Data\01-Hells Bells.mp3",document.GetField("targetfilename").StringValue);
         }
         [Test]
         [ExpectedException(typeof(ArgumentNullException))]
@@ -45,7 +45,7 @@ namespace MIndexer.Tests
             var document = lFileIndexer.PrepareDocument(@"Lyrics\01-Hells Bells.xml");
             Assert.IsNotNull(document);
             Assert.AreEqual(@"I am not sure about the lyrics but I have a clue", document.GetField("tagged").StringValue);
-            Assert.AreEqual(@"Data\01-Hells Bells.mp3", document.GetField("filename").StringValue);
+            Assert.AreEqual(@"Data\01-Hells Bells.mp3", document.GetField("targetfilename").StringValue);
         }
         [Test]
         [ExpectedException(typeof(ArgumentNullException))]

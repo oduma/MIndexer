@@ -32,8 +32,9 @@ namespace MIndexer.Core
             Document document = new Document();
 
             document.Add(new Field("tagged", content, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.YES));
-            document.Add(new Field("filename", filePath.Replace("\\", "").Replace(" ", "").Substring(filePath.IndexOf(Path.VolumeSeparatorChar) + 1), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.YES));
-            document.Add(new Field("tagretfilename", targetFileName, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.YES));
+            document.Add(new Field("filename", filePath.ReplaceAny(new string[] {"\\"," ","."}, "").Substring(filePath.IndexOf(Path.VolumeSeparatorChar) + 1), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.YES))
+            ;
+            document.Add(new Field("targetfilename", targetFileName, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.YES));
 
             return document;
         }

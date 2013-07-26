@@ -135,7 +135,7 @@ namespace MIndexer.Tests
             _indexer.IndexAnLFile(@"Lyrics\01-Hells Bells.lyrics");
 
             LFileIndexerSearcher lFileIndexerSearcher = new LFileIndexerSearcher();
-            var results = lFileIndexerSearcher.Search("lyr*", 40, new string[] { "targetfilename","tagged" }).ToList();
+            var results = lFileIndexerSearcher.Search("clue", 40, new string[] { "targetfilename","tagged" }).ToList();
             Assert.IsNotNull(results);
             Assert.AreEqual(1, results.Count);
             Assert.AreEqual(results[0], @"Data\01-Hells Bells.mp3");

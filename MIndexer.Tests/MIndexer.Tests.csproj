@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DownloaderTests.cs" />
+    <Compile Include="ExtentionMethodsTests.cs" />
     <Compile Include="FileIndexersTests.cs" />
     <Compile Include="IndexerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

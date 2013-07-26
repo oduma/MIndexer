@@ -95,12 +95,17 @@ namespace MIndexer.Core
             else
                 mExtentions = mExtentions.Select(e => (e.StartsWith(".")) ? e : "." + e).ToArray();
 
+            IndexAFile(filePath, mExtentions,_mFileIndexer);
+        }
+
+        private void IndexAFile(string filePath, string[] mExtentions,IFileIndexerSearcher fileIndexerSearcher)
+        {
             if (mExtentions.Any(e => Path.GetExtension(filePath) == e))
             {
                 try
                 {
-                    if(_mFileIndexer.Search("filename:" +filePath.Replace("\\","/").Replace(" ","").Substring(filePath.IndexOf(Path.VolumeSeparatorChar)+1) ,1,new []{"filename"}).Count()<=0)
-                        _writer.AddDocument(_mFileIndexer.PrepareDocument(filePath));
+                    if(fileIndexerSearcher.Search("filename:" +filePath.ReplaceAny(new string[]{ "\\"," ","."},"").Substring(filePath.IndexOf(Path.VolumeSeparatorChar)+1) ,1,new []{"filename"}).Count()<=0)
+                        _writer.AddDocument(fileIndexerSearcher.PrepareDocument(filePath));
                 }
                 catch (Exception ex)
                 {
@@ -115,19 +120,7 @@ namespace MIndexer.Core
             if (!File.Exists(filePath))
                 throw new ArgumentNullException("filePath");
 
-            if (Path.GetExtension(filePath) == ".lyrics")
-            {
-                try
-                {
-                    if (_lFileIndexer.Search("filename:" + filePath.Replace("\\", "/").Replace(" ","").Substring(filePath.IndexOf(Path.VolumeSeparatorChar) + 1), 1,new string[]{"filename"}).Count() <= 0)
-                        _writer.AddDocument(_lFileIndexer.PrepareDocument(filePath));
-                }
-                catch (Exception ex)
-                {
-                    LoggingManager.LogSciendoSystemError(ex);
-                    throw;
-                }
-            }
+            IndexAFile(filePath,new string[] {".lyrics"}, _lFileIndexer);
         }
 
         public void RetrieveLyricsForAnMFile(string filePath)

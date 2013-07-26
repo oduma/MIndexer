@@ -77,9 +77,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BaseFileIndexerSearcher.cs" />
     <Compile Include="DataTypes\Lyrics.cs" />
     <Compile Include="DataTypes\OperationType.cs" />
     <Compile Include="DownloaderHelper.cs" />
+    <Compile Include="ExtentionMethods.cs" />
     <Compile Include="FileProcessor.cs" />
     <Compile Include="FSWatcher.cs" />
     <Compile Include="Indexer.cs" />
