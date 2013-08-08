@@ -1,5 +1,7 @@
 ﻿using System;
 using MIndexer.Core;
+using MIndexer.Core.DataTypes;
+using MIndexer.Core.Interfaces;
 using NUnit.Framework;
 
 namespace MIndexer.Tests
@@ -7,24 +9,52 @@ namespace MIndexer.Tests
     [TestFixture]
     public class DownloaderTests
     {
+
         [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void DownloadLyrics_NoUrl()
         {
-            DownloaderHelper downloaderHelper= new DownloaderHelper();
-            downloaderHelper.DownloadLyrics(null);
+            DownloadManager DownloadManager= new DownloadManager("present","present",new string[]{"abc"},new TagReaderHelper(),new FileMap());
+            DownloadManager.DownloadLyrics(null);
         }
         [Test]
         public void DownloadLyrics_BadUrl()
         {
-            DownloaderHelper downloaderHelper = new DownloaderHelper();
-            Assert.IsNullOrEmpty(downloaderHelper.DownloadLyrics("crazy url"));
+            DownloadManager DownloadManager = new DownloadManager("present", "present", new string[] { "abc" }, new TagReaderHelper(), new FileMap());
+            Assert.IsNullOrEmpty(DownloadManager.DownloadLyrics("crazy url"));
         }
         [Test]
         public void DownloadLyrics_OK()
         {
-            DownloaderHelper downloaderHelper = new DownloaderHelper();
-            Assert.IsNotNullOrEmpty(downloaderHelper.DownloadLyrics("paloma-faith/new-york-lyrics/"));
+            DownloadManager DownloadManager = new DownloadManager("present", "present", new string[] { "abc" }, new TagReaderHelper(), new FileMap());
+            Assert.IsNotNullOrEmpty(DownloadManager.DownloadLyrics("paloma-faith/new-york-lyrics/"));
+        }
+
+        [TestCase(new object[] { "", null, null,null })]
+        [TestCase(new object[] { "present", null, null, null })]
+        [TestCase(new object[] { "present", "present", null, null })]
+        [TestCase(new object[] { "present", "present", new string[] { "abc" }, null })]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void DownloadManagerConstructorParamsNotSent(string mRootFolder, string lRootFolder, string[] lExtentionsFilter,  FileMap fileMap)
+        {
+            new DownloadManager(mRootFolder, lRootFolder, lExtentionsFilter,
+                                                                  new TagReaderHelper(), fileMap);
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void DownloadManagerConstructorTagReaderHelperNotSent()
+        {
+            new DownloadManager("present", "present", new string[]{"abc"}, 
+                                                                  null, new FileMap());
+        }
+
+        [TestCase(new object[] { "wrong", "present" })]
+        [TestCase(new object[] { "Input", "wrong" })]
+        [ExpectedException(typeof(ArgumentException))]
+        public void DownloadManagerConstructorSomeWrongParameters(string mRootFolder, string lRootFolder)
+        {
+            new DownloadManager(mRootFolder, lRootFolder, new string[] { "abc" }, new TagReaderHelper(), new FileMap());
         }
 
     }

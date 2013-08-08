@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MIndexer.Core;
+using MIndexer.Core.IndexMaintainers;
+using MIndexer.Core.IndexSearchers;
 using NUnit.Framework;
 
 namespace MIndexer.Tests
@@ -38,6 +40,30 @@ namespace MIndexer.Tests
         public void ReplaceAny_Null()
         {
             Assert.IsNullOrEmpty(string.Empty.ReplaceAny(new string[] { ":", ",", "." }, ""));
+        }
+
+        [Test]
+        public void IndexFileEmptyFilePath()
+        {
+            Assert.False("".IndexFile(new LIndexManager()));
+        }
+        [Test]
+        public void IndexFileNoIndexMaintainer()
+        {
+            Assert.False("somefile".IndexFile(null));
+        }
+        [Test]
+        public void IndexFileFileDoesNotExist()
+        {
+            Assert.False("somefile".IndexFile(new LIndexManager()));
+        }
+
+        [TestCase(new object[]{@"Input\RootFolder\FileInRoot.mp3",true},ExpectedResult=true)]
+        [TestCase(new object[] { @"Input\RootFolder\Folder1\File2InFolder1.mp3", false }, ExpectedResult = false)]
+        public bool IndexFile(string someFile, bool valueReturnedByTheIndexMaintainer)
+        {
+            IIndexManager indexMaintainer=TestHelper.GetMockIndexMaintainer(new Dictionary<string,bool>{{someFile,valueReturnedByTheIndexMaintainer}});
+            return someFile.IndexFile(indexMaintainer);
         }
     }
 }
