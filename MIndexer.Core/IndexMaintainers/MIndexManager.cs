@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using ID3Sharp;
 using Lucene.Net.Documents;
 using MIndexer.Core.DataTypes;
-using MIndexer.Core.IndexSearchers;
 using MIndexer.Core.Interfaces;
 
 namespace MIndexer.Core.IndexMaintainers

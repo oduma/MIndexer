@@ -128,25 +128,28 @@ namespace MIndexer.Tests
         }
 
         [Test]
-        public void LlIndexManagerIndexAFileOk()
+        public void LIndexManagerIndexAFileOk()
         {
+            File.Copy(@"Lyrics\01-Hells Bells.xml", @"Lyrics\01-Hells Bells.lyrics", true);
+
             _lIndexManager = new LIndexManager();
-            _lIndexManager.IndexAFile(@"Data\01-Hells Bells.mp3");
-            var results = _lIndexManager.Search("Hel*", 40, new string[] { "tagged" }).ToList();
+            _lIndexManager.IndexAFile(@"Lyrics\01-Hells Bells.lyrics");
+            var results = _lIndexManager.Search("about*", 40, new string[] { "tagged" }).ToList();
+            _lIndexManager.CommitAndOptimize();
             Assert.IsNotNull(results);
             Assert.AreEqual(1, results.Count);
-            Assert.True(results.Contains(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Data\01-Hells Bells.mp3")));
+            Assert.True(results.Contains(@"Data\01-Hells Bells.mp3"));
         }
 
         [Test]
         [ExpectedException(typeof(ArgumentException))]
-        public void LlIndexManagerIndexAFileWrongManagerForTheFile()
+        public void LIndexManagerIndexAFileWrongManagerForTheFile()
         {
             _lIndexManager = new LIndexManager();
             _lIndexManager.IndexAFile(@"Data\01-Hells Bells.mp3");
         }
         [Test]
-        public void MlIndexManagerIndexAFileOk()
+        public void MIndexManagerIndexAFileOk()
         {
             ITagReaderHelper tagReaderHelper=TestHelper.GetMockTagReader(new Dictionary<string, ID3Tag>
                                                 {
@@ -167,14 +170,15 @@ namespace MIndexer.Tests
             var results = _mIndexManager.Search("Hel*", 40, new string[] { "tagged" }).ToList();
             Assert.IsNotNull(results);
             Assert.AreEqual(1, results.Count);
-            Assert.True(results.Contains(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Input\RootFolder\FileInRoot.mp3")));
+            Assert.True(results.Contains(@"Input\RootFolder\FileInRoot.mp3"));
         }
 
         [Test]
-        public void MlIndexManagerIndexAFileWrongManagerForTheFile()
+        [ExpectedException(typeof(ArgumentException))]
+        public void MIndexManagerIndexAFileWrongManagerForTheFile()
         {
-            _lIndexManager = new LIndexManager();
-            _lIndexManager.IndexAFile(@"nonexistent");
+            _mIndexManager = new MIndexManager(new TagReaderHelper());
+            _mIndexManager.IndexAFile(@"Lyrics\completeNoTargetFile.lyrics");
         }
     }
 }

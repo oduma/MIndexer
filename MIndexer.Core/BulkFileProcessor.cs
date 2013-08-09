@@ -15,14 +15,15 @@ namespace MIndexer.Core
 
         public void ProcessLFilesFromMap(FileMap fileMap,
             IDownloadManager downloadManager,
-            IIndexManager indexMaintainer)
+            IIndexManager indexManager)
         {
             if (fileMap == null)
                 throw new ArgumentNullException("fileMap");
             if (downloadManager == null)
                 throw new ArgumentNullException("downloadManager");
-            if (indexMaintainer == null)
-                throw new ArgumentNullException("indexMaintainer");
+            if (indexManager == null)
+                throw new ArgumentNullException("indexManager");
+            IndexingThreadedLauncher indexLauncher= new IndexingThreadedLauncher(indexManager);
             List<FileData> allSubDirectoriesWithFiles = fileMap.GetAllFolders(true);
             Task<List<FileData>> downloadTask = new Task<List<FileData>>(downloadManager.DownloadFolder, allSubDirectoriesWithFiles[0]);
             downloadTask.Start();
@@ -36,7 +37,7 @@ namespace MIndexer.Core
                                                                    downloadedFiles.Count(
                                                                        d => d.LState == State.Downloaded),
                                                                    State.Downloaded, FileType.Lyrics));
-                Task<List<FileData>> indexTask = new Task<List<FileData>>(indexMaintainer.IndexFiles, downloadedFiles);
+                Task<List<FileData>> indexTask = new Task<List<FileData>>(indexLauncher.IndexLFiles, downloadedFiles);
                 indexTask.Start();
                 if (i < allSubDirectoriesWithFiles.Count)
                 {
@@ -44,7 +45,7 @@ namespace MIndexer.Core
                     downloadTask.Start();
                 }
                 indexTask.Wait();
-                indexMaintainer.CommitAndOptimize();
+                indexManager.CommitAndOptimize();
                 List<FileData> indexedFiles = indexTask.Result;
                 if (BulkFileProgress != null)
                     BulkFileProgress(this,
@@ -73,10 +74,14 @@ namespace MIndexer.Core
                 throw new ArgumentNullException("fileMap");
             if(indexMaintainer == null)
                 throw new ArgumentNullException("indexMaintainer");
+            MFilesProcessing(fileMap, indexMaintainer);
+        }
 
-            foreach (FileMap subFileMap in fileMap.SubFiles.Where(s=>!s.FileData.IsFolder))
+        private void MFilesProcessing(FileMap fileMap, IIndexManager indexMaintainer)
+        {
+            foreach (FileMap subFileMap in fileMap.SubFiles.Where(s => !s.FileData.IsFolder))
             {
-                if(subFileMap.FileData.Name.IndexFile(indexMaintainer))
+                if (subFileMap.FileData.Name.IndexFile(indexMaintainer))
                     subFileMap.FileData.State = State.Indexed;
             }
             if (BulkFileProgress != null)
@@ -86,8 +91,51 @@ namespace MIndexer.Core
                                                                    s => s.FileData.State == State.Indexed),
                                                                State.Indexed, FileType.Music));
             indexMaintainer.CommitAndOptimize();
-            foreach(FileMap subFolderMap in fileMap.SubFiles.Where(s=>s.FileData.IsFolder))
-                ProcessMFilesFromMap(subFolderMap,indexMaintainer);
+            foreach (FileMap subFolderMap in fileMap.SubFiles.Where(s => s.FileData.IsFolder))
+                MFilesProcessing(subFolderMap, indexMaintainer);
         }
+
+        public void ProcessLFilesFromMapThreaded(object obj)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ProcessMFilesFromMapThreaded(object obj)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class IndexingThreadedLauncher
+    {
+        private readonly IIndexManager _indexManager;
+
+        public IndexingThreadedLauncher(IIndexManager indexManager)
+        {
+            _indexManager = indexManager;
+        }
+
+        public List<FileData> IndexLFiles(object downloadedFiles)
+        {
+            List<FileData> results = (List<FileData>)downloadedFiles;
+            foreach (FileData fileData in results)
+            {
+                if (fileData.LName.IndexFile(_indexManager))
+                    fileData.LState = State.Indexed;
+            }
+            return results;
+        }
+
+        public List<FileData> IndexMFiles(object downloadedFiles)
+        {
+            List<FileData> results = (List<FileData>)downloadedFiles;
+            foreach (FileData fileData in results)
+            {
+                if (fileData.LName.IndexFile(_indexManager))
+                    fileData.LState = State.Indexed;
+            }
+            return results;
+        }
+
     }
 }

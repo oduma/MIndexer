@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using CommandLine;
 using CommandLine.Text;
 using MIndexer.Core;
@@ -37,7 +38,11 @@ namespace MIndexer.Builder
 
         private static void ProcessMap(string startFromFolder, string outputFile)
         {
-            throw new NotImplementedException();
+            BulkFileProcessor bulkFileProcessor= new BulkFileProcessor();
+            DownloadAndIndexFromMapRequest downloadAndIndexFromMapRequest= new DownloadAndIndexFromMapRequest();
+            Task lyricsTask= new Task(bulkFileProcessor.ProcessLFilesFromMapThreaded,downloadAndIndexFromMapRequest );
+            IndexFromMapRequest indexFromMapRequest= new IndexFromMapRequest();
+            Task musicTask = new Task(bulkFileProcessor.ProcessMFilesFromMapThreaded, indexFromMapRequest);
         }
 
         private static FileMap CreateNewMap(string rootFolder, string mapFileName)

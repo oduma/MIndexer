@@ -19,7 +19,7 @@ namespace MIndexer.Core.IndexMaintainers
 
         public BaseIndexManager()
         {
-            _writer = GetIndexWriter();
+            InititateIndexWriter();
             
         }
         public void StartMonitoringFolder(string folderPath)
@@ -50,16 +50,15 @@ namespace MIndexer.Core.IndexMaintainers
 
 
 
-        private IndexWriter GetIndexWriter()
+        private void InititateIndexWriter()
         {
             var indexFolder = new DirectoryInfo(Utils.GetFolderFromConfiguration("IndexDir"));
-            var indexDir = FSDirectory.Open(indexFolder, _lockFactory);
-            var writer = new IndexWriter(indexDir, new StandardAnalyzer(
+            var indexDir = FSDirectory.Open(indexFolder);
+            _writer = new IndexWriter(indexDir, new StandardAnalyzer(
                                                     Lucene.Net.Util.Version.LUCENE_30),
                                       IndexWriter.MaxFieldLength.UNLIMITED);
-            writer.SetMergePolicy(new LogDocMergePolicy(_writer));
-            writer.MergeFactor = 5;
-            return writer;
+            _writer.SetMergePolicy(new LogDocMergePolicy(_writer));
+            _writer.MergeFactor = 5;
         }
 
         public bool IndexAFile(string filePath)
@@ -71,7 +70,10 @@ namespace MIndexer.Core.IndexMaintainers
             try
             {
                 if (Search("filename:" + filePath.ReplaceAny(new string[] { "\\", " ", "." }, "").Substring(filePath.IndexOf(Path.VolumeSeparatorChar) + 1), 1, new[] { "filename" }).Count() <= 0)
-                    _writer.AddDocument(PrepareDocument(filePath));
+                {
+                    var document = PrepareDocument(filePath);
+                    _writer.AddDocument(document);
+                }
                 return true;
             }
             catch (Exception ex)
@@ -83,30 +85,24 @@ namespace MIndexer.Core.IndexMaintainers
 
         protected abstract string[] AcceptableExtentions { get;}
 
-        public List<FileData> IndexFiles(object downloadedFiles)
-        {
-            List<FileData> results = (List<FileData>)downloadedFiles;
-            foreach (FileData fileData in results)
-            {
-                if (fileData.LName.IndexFile(this))
-                    fileData.LState = State.Indexed;
-
-            }
-            return results;
-        }
-
         public void CommitAndOptimize()
         {
-            _writer.Commit();
             _writer.Optimize();
         }
 
         public void CloseWriter()
         {
-            if(_writer!=null)
+            try
             {
-                _writer.Flush(true,true,true);
-                _writer.Dispose();
+                if (_writer != null)
+                {
+                    _writer.Flush(true, true, true);
+                    _writer.Dispose();
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggingManager.LogSciendoSystemError(ex);
             }
         }
 

@@ -46,7 +46,7 @@ namespace MIndexer.Tests
                                           {"a1/t5-lyrics/", "lyrics5"}
                                       }, "Input", "Lyrics", new string[] { "lyrics" }, tagReaderHelper, fileMap);
             BulkFileProcessor bulkFileProcessor = new BulkFileProcessor();
-            IIndexManager lIndexMaintainer = TestHelper.GetMockIndexMaintainer(new Dictionary<string, bool>
+            IIndexManager lIndexManager = TestHelper.GetMockIndexManager(new Dictionary<string, bool>
                                                                                       {
                                                                                           {
                                                                                               @"Lyrics\Input\RootFolder\FileInRoot.mp3.lyrics"
@@ -69,7 +69,7 @@ namespace MIndexer.Tests
                                                                                               , true
                                                                                               }
                                                                                       });
-            bulkFileProcessor.ProcessLFilesFromMap(fileMap, downloadManager, lIndexMaintainer);
+            bulkFileProcessor.ProcessLFilesFromMap(fileMap, downloadManager, lIndexManager);
             Assert.IsNotNull(fileMap);
             TestHelper.ValidateFiles(
             new string[] {
@@ -145,7 +145,7 @@ namespace MIndexer.Tests
         public void BulkFileProcessorProcessMFilesFromMapOk()
         {
             FileMap fileMap = Serializer.DeserializeOneFromFile<FileMap>(@"Input\map.xml");
-            IIndexManager mIndexMaintainer = TestHelper.GetMockIndexMaintainer(new Dictionary<string, bool>
+            IIndexManager mIndexMaintainer = TestHelper.GetMockIndexManager(new Dictionary<string, bool>
                                                                                       {
                                                                                           {
                                                                                               @"Input\RootFolder\FileInRoot.mp3"

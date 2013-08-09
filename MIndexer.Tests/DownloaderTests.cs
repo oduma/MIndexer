@@ -14,26 +14,27 @@ namespace MIndexer.Tests
         [ExpectedException(typeof(ArgumentNullException))]
         public void DownloadLyrics_NoUrl()
         {
-            DownloadManager DownloadManager= new DownloadManager("present","present",new string[]{"abc"},new TagReaderHelper(),new FileMap());
+            DownloadManager DownloadManager = new DownloadManager("Input", @"Lyrics", new string[] { "abc" }, new TagReaderHelper(), new FileMap());
             DownloadManager.DownloadLyrics(null);
         }
         [Test]
         public void DownloadLyrics_BadUrl()
         {
-            DownloadManager DownloadManager = new DownloadManager("present", "present", new string[] { "abc" }, new TagReaderHelper(), new FileMap());
+            DownloadManager DownloadManager = new DownloadManager("Input", @"Lyrics", new string[] { "abc" }, new TagReaderHelper(), new FileMap());
             Assert.IsNullOrEmpty(DownloadManager.DownloadLyrics("crazy url"));
         }
         [Test]
+        [Ignore("Integration test")]
         public void DownloadLyrics_OK()
         {
-            DownloadManager DownloadManager = new DownloadManager("present", "present", new string[] { "abc" }, new TagReaderHelper(), new FileMap());
+            DownloadManager DownloadManager = new DownloadManager("Input", @"Lyrics", new string[] { "abc" }, new TagReaderHelper(), new FileMap());
             Assert.IsNotNullOrEmpty(DownloadManager.DownloadLyrics("paloma-faith/new-york-lyrics/"));
         }
 
-        [TestCase(new object[] { "", null, null,null })]
-        [TestCase(new object[] { "present", null, null, null })]
-        [TestCase(new object[] { "present", "present", null, null })]
-        [TestCase(new object[] { "present", "present", new string[] { "abc" }, null })]
+        [TestCase(new object[] { null, null, null,null })]
+        [TestCase(new object[] { "Input", null, null, null })]
+        [TestCase(new object[] { "Input", @"Lyrics", null, null })]
+        [TestCase(new object[] { "Input", @"Lyrics", new string[] { "abc" }, null })]
         [ExpectedException(typeof(ArgumentNullException))]
         public void DownloadManagerConstructorParamsNotSent(string mRootFolder, string lRootFolder, string[] lExtentionsFilter,  FileMap fileMap)
         {

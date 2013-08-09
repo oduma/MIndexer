@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Lucene.Net.Documents;
 using MIndexer.Core.DataTypes;
@@ -58,7 +59,7 @@ namespace MIndexer.Core.IndexMaintainers
 
         protected override string[] AcceptableExtentions
         {
-            get { return new string[] {"lyrics"}; }
+            get { return new string[] {".lyrics"}; }
         }
     }
 }

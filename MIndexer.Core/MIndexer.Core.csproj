@@ -55,6 +55,9 @@
     <Reference Include="ID3Sharp">
       <HintPath>..\Lib\ID3Sharp.dll</HintPath>
     </Reference>
+    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
+      <HintPath>..\Lib\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="Lucene.Net">
       <HintPath>..\packages\Lucene.Net.3.0.3\lib\NET40\Lucene.Net.dll</HintPath>
     </Reference>
@@ -80,10 +83,11 @@
   <ItemGroup>
     <Compile Include="BulkFileProcessor.cs" />
     <Compile Include="BulkFileProgressEventArgs.cs" />
+    <Compile Include="DataTypes\DownloadAndIndexFromMapRequest.cs" />
     <Compile Include="DataTypes\FileData.cs" />
     <Compile Include="DataTypes\FileMap.cs" />
-    <Compile Include="DataTypes\FileMapsCouple.cs" />
     <Compile Include="DataTypes\FileType.cs" />
+    <Compile Include="DataTypes\IndexFromMapRequest.cs" />
     <Compile Include="DataTypes\Lyrics.cs" />
     <Compile Include="DataTypes\OperationType.cs" />
     <Compile Include="DownloadManager.cs" />

@@ -14,12 +14,10 @@ namespace MIndexer.Core.IndexSearchers
 {
     public class FileSearcher:IFileSearcher
     {
-        protected readonly static SimpleFSLockFactory _lockFactory = new SimpleFSLockFactory();
-
         public IEnumerable<string> Search(string query, int maxResults, string[] searchFields)
         {
             var indexFileLocation = new DirectoryInfo(Utils.GetFolderFromConfiguration("IndexDir"));
-            Directory dir = FSDirectory.Open(indexFileLocation, _lockFactory);
+            Directory dir = FSDirectory.Open(indexFileLocation);
 
             IndexSearcher searcher = new IndexSearcher(dir);
 

@@ -34,6 +34,8 @@ namespace MIndexer.Core
                 throw new ArgumentNullException("lExtentionsFilter");
             if (tagReaderHelper == null)
                 throw new ArgumentNullException("tagReaderHelper");
+            if (fileMap == null)
+                throw new ArgumentNullException("fileMap");
             if (!Directory.Exists(mRootFolder))
                 throw new ArgumentException("Folder does not exist", "mRootFolder");
             if (!Directory.Exists(lRootFolder))

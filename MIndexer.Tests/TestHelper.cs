@@ -34,20 +34,33 @@ namespace MIndexer.Tests
             Assert.AreEqual(inputFolder, fileData.Name);
         }
 
-        public static IIndexManager GetMockIndexMaintainer(Dictionary<string,bool> inOuts)
+        public static IIndexManager GetMockIndexManager(Dictionary<string,bool> inOuts)
         {
-            Mock<IIndexManager> indexMaintainer = new Mock<IIndexManager>(MockBehavior.Default);
-            indexMaintainer.CallBase = false;
-            indexMaintainer.Setup(m => m.CommitAndOptimize());
+            Mock<IIndexManager> indexManager = new Mock<IIndexManager>(MockBehavior.Default);
+            indexManager.CallBase = false;
+            indexManager.Setup(m => m.CommitAndOptimize());
             foreach (string key in inOuts.Keys)
             {
                 string key1 = key;
                 bool val1 = inOuts[key1];
-                indexMaintainer.Setup(m => m.IndexAFile(key1)).Returns(val1);
+                indexManager.Setup(m => m.IndexAFile(key1)).Returns(val1);
             }
-            return indexMaintainer.Object;
+            return indexManager.Object;
         }
 
+        public static TManager GetMockIndexManager<TManager>(Dictionary<string, bool> inOuts) where TManager: class, IIndexManager
+        {
+            Mock<TManager> indexManager = new Mock<TManager>(MockBehavior.Default);
+            indexManager.CallBase = true;
+            indexManager.Setup(m => m.CommitAndOptimize());
+            foreach (string key in inOuts.Keys)
+            {
+                string key1 = key;
+                bool val1 = inOuts[key1];
+                indexManager.Setup(m => m.IndexAFile(key1)).Returns(val1);
+            }
+            return indexManager.Object;
+        }
 
         public static ITagReaderHelper GetMockTagReader(Dictionary<string, ID3Tag> inOuts)
         {

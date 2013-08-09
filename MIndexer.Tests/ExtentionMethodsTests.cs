@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using MIndexer.Core;
 using MIndexer.Core.IndexMaintainers;
-using MIndexer.Core.IndexSearchers;
 using NUnit.Framework;
 
 namespace MIndexer.Tests
@@ -45,8 +41,10 @@ namespace MIndexer.Tests
         [Test]
         public void IndexFileEmptyFilePath()
         {
-            Assert.False("".IndexFile(new LIndexManager()));
+            IIndexManager indexManager= TestHelper.GetMockIndexManager(new Dictionary<string, bool>{{"abc",true}});
+            Assert.False("".IndexFile(indexManager));
         }
+
         [Test]
         public void IndexFileNoIndexMaintainer()
         {
@@ -55,14 +53,15 @@ namespace MIndexer.Tests
         [Test]
         public void IndexFileFileDoesNotExist()
         {
-            Assert.False("somefile".IndexFile(new LIndexManager()));
+            IIndexManager indexManager=TestHelper.GetMockIndexManager(new Dictionary<string, bool>{{"abc",true}});
+            Assert.False("somefile".IndexFile(indexManager));
         }
 
         [TestCase(new object[]{@"Input\RootFolder\FileInRoot.mp3",true},ExpectedResult=true)]
         [TestCase(new object[] { @"Input\RootFolder\Folder1\File2InFolder1.mp3", false }, ExpectedResult = false)]
         public bool IndexFile(string someFile, bool valueReturnedByTheIndexMaintainer)
         {
-            IIndexManager indexMaintainer=TestHelper.GetMockIndexMaintainer(new Dictionary<string,bool>{{someFile,valueReturnedByTheIndexMaintainer}});
+            IIndexManager indexMaintainer=TestHelper.GetMockIndexManager(new Dictionary<string,bool>{{someFile,valueReturnedByTheIndexMaintainer}});
             return someFile.IndexFile(indexMaintainer);
         }
     }
