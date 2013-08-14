@@ -8,6 +8,7 @@ using Lucene.Net.Index;
 using Lucene.Net.Store;
 using MIndexer.Core.DataTypes;
 using MIndexer.Core.IndexSearchers;
+using MIndexer.Core.Interfaces;
 using Sciendo.Common.Logging;
 
 namespace MIndexer.Core.IndexMaintainers
@@ -16,12 +17,15 @@ namespace MIndexer.Core.IndexMaintainers
     {
         private FSWatcher _fsWatcher;
         private IndexWriter _writer;
+        private readonly IContentProvider _contentProvider;
 
-        public BaseIndexManager()
+
+        public BaseIndexManager(IContentProvider contentProvider)
         {
+            _contentProvider = contentProvider;
             InititateIndexWriter();
-            
         }
+
         public void StartMonitoringFolder(string folderPath)
         {
             _fsWatcher = new FSWatcher(folderPath, OperationProcess, RenameOperationProcess);
@@ -31,11 +35,23 @@ namespace MIndexer.Core.IndexMaintainers
 
         protected abstract void OperationProcess(string path, OperationType operationType);
 
-        internal abstract Document PrepareDocument(string filePath);
+        internal Document PrepareDocument(string filePath)
+        {
+            if (string.IsNullOrEmpty(filePath))
+                throw new ArgumentNullException("filePath");
+            if (!File.Exists(filePath))
+                throw new ArgumentException("File does not exist:" + filePath);
+            var content = _contentProvider.GetContentAndTarget(filePath);
+            if (content == null || string.IsNullOrEmpty(content.Content) || string.IsNullOrEmpty(content.TargetFileName))
+                throw new ArgumentException("Cannot read content from file: " + filePath);
+            return PrepareDocument(filePath, content.Content, content.TargetFileName);
+        }
 
 
         protected Document PrepareDocument(string filePath, string content, string targetFileName)
         {
+            if(!File.Exists(targetFileName))
+                throw new ArgumentException("target file name does not exist");
             Document document = new Document();
 
             document.Add(new Field("tagged", content, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.YES));

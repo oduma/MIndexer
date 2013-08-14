@@ -74,7 +74,8 @@
   <ItemGroup>
     <Compile Include="BulkFileProcessorTests.cs" />
     <Compile Include="CommandLineOptionsTests.cs" />
-    <Compile Include="DownloaderTests.cs" />
+    <Compile Include="DownloadManagerTests.cs" />
+    <Compile Include="LContentProviderRemoteTests.cs" />
     <Compile Include="ExtentionMethodsTests.cs" />
     <Compile Include="FileMapTests.cs" />
     <Compile Include="IndexerTests.cs" />
@@ -92,6 +93,10 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="log4net.config" />
+    <Content Include="Data\Dance 1.mp3">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Input\bigmap.xml" />
     <Content Include="Input\map.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -105,6 +110,10 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Input\RootFolder\Folder1\OtherFile.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Input\smallmap.xml" />
+    <Content Include="IntegrationTests\Output\SmallFolderLyrics\placeholder.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Lyrics\01-Hells Bells.xml">

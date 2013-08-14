@@ -114,7 +114,7 @@ namespace MIndexer.Core
                 return null;
             try
             {
-                LIndexManager lIndexMaintainer = new LIndexManager();
+                LIndexManager lIndexMaintainer = new LIndexManager(new LContentProviderLocal());
                 lIndexMaintainer.UpdateIndexForAFile(filePath);
                 return filePath;
             }

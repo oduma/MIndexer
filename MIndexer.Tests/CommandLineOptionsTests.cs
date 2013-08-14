@@ -58,7 +58,15 @@ namespace MIndexer.Tests
             return success;
         }
 
-        [TestCase(new object[] { new string[] { "?" } }, ExpectedResult = "MIndexer.Builder 1.0.0.0\r\n\r\n  c, create      (Default: map.xml) Creates a new map file\r\n  u, use         (Default: ) Use a map file\r\n  i, inFolder    Required. (Default: ) Generates a xml file based on data from \r\n                 the folder structure.\r\n  ?              Display this help on the screen.\r\n")]
+        [TestCase(new object[] { new string[] { "?" } }, ExpectedResult = @"MIndexer.Builder 1.0.0.0
+
+  c, create          (Default: map.xml) Creates a new map file
+  u, use             (Default: ) Use a map file
+  i, inFolder        Required. (Default: ) Generates a xml file based on data 
+                     from the folder structure.
+  l, lirycsFolder    (Default: ) Folder where the lyrics are to be stored.
+  ?                  Display this help on the screen.
+")]
         public string OptionsSetForHelp(string[] args)
         {
             var options = new Options();

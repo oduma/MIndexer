@@ -14,7 +14,7 @@ namespace MIndexer.Core
         public event EventHandler<BulkFileProgressEventArgs> BulkFileProgress;
 
         public void ProcessLFilesFromMap(FileMap fileMap,
-            IDownloadManager downloadManager,
+            DownloadManager downloadManager,
             IIndexManager indexManager)
         {
             if (fileMap == null)
@@ -25,7 +25,7 @@ namespace MIndexer.Core
                 throw new ArgumentNullException("indexManager");
             IndexingThreadedLauncher indexLauncher= new IndexingThreadedLauncher(indexManager);
             List<FileData> allSubDirectoriesWithFiles = fileMap.GetAllFolders(true);
-            Task<List<FileData>> downloadTask = new Task<List<FileData>>(downloadManager.DownloadFolder, allSubDirectoriesWithFiles[0]);
+            Task<List<FileData>> downloadTask = new Task<List<FileData>>(downloadManager.DownloadFolder, allSubDirectoriesWithFiles[0].Name);
             downloadTask.Start();
             for (int i = 1; i <= allSubDirectoriesWithFiles.Count; i++)
             {
@@ -41,7 +41,7 @@ namespace MIndexer.Core
                 indexTask.Start();
                 if (i < allSubDirectoriesWithFiles.Count)
                 {
-                    downloadTask = new Task<List<FileData>>(downloadManager.DownloadFolder, allSubDirectoriesWithFiles[i]);
+                    downloadTask = new Task<List<FileData>>(downloadManager.DownloadFolder, allSubDirectoriesWithFiles[i].Name);
                     downloadTask.Start();
                 }
                 indexTask.Wait();
@@ -104,6 +104,7 @@ namespace MIndexer.Core
         {
             throw new NotImplementedException();
         }
+
     }
 
     public class IndexingThreadedLauncher

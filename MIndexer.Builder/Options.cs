@@ -1,4 +1,5 @@
-﻿using CommandLine;
+﻿using System;
+using CommandLine;
 using CommandLine.Text;
 
 namespace MIndexer.Builder
@@ -13,6 +14,9 @@ namespace MIndexer.Builder
 
         [Option('i', "inFolder", DefaultValue = "", HelpText = "Generates a xml file based on data from the folder structure.", Required=true)]
         public string StartFromFolder { get; set; }
+
+        [Option('l', "lirycsFolder", DefaultValue = "", HelpText = "Folder where the lyrics are to be stored.", Required = false)]
+        public string LyricsRootFolder { get; set; }
 
         [HelpOption('?', null, HelpText = "Display this help on the screen.")]
         public string GetUssage()

@@ -12,18 +12,18 @@ using Sciendo.Common.Serialization;
 
 namespace MIndexer.Core
 {
-    public class DownloadManager : IDownloadManager
+    public class DownloadManager
     {
         private readonly string _mRootFolder;
         private readonly string _lRootFolder;
         private readonly string[] _lExtentionsFilter;
-        private readonly ITagReaderHelper _tagReaderHelper;
+        private readonly IContentProvider _contentProvider;
         private readonly FileMap _fileMap;
 
         public DownloadManager(string mRootFolder, 
             string lRootFolder, 
             string[] lExtentionsFilter, 
-            ITagReaderHelper tagReaderHelper, 
+            IContentProvider contentProvider, 
             FileMap fileMap)
         {
             if (string.IsNullOrEmpty(mRootFolder))
@@ -32,8 +32,8 @@ namespace MIndexer.Core
                 throw new ArgumentNullException("lRootFolder");
             if (lExtentionsFilter == null || lExtentionsFilter.Length == 0)
                 throw new ArgumentNullException("lExtentionsFilter");
-            if (tagReaderHelper == null)
-                throw new ArgumentNullException("tagReaderHelper");
+            if (contentProvider == null)
+                throw new ArgumentNullException("contentProvider");
             if (fileMap == null)
                 throw new ArgumentNullException("fileMap");
             if (!Directory.Exists(mRootFolder))
@@ -43,16 +43,16 @@ namespace MIndexer.Core
             _mRootFolder = mRootFolder;
             _lRootFolder = lRootFolder;
             _lExtentionsFilter = lExtentionsFilter;
-            _tagReaderHelper = tagReaderHelper;
+            _contentProvider = contentProvider;
             _fileMap = fileMap;
         }
 
         public List<FileData> DownloadFolder(object folderPath)
         {
-            FileData currentFolder = (FileData)folderPath;
+            string currentFolder = (string)folderPath;
             List<FileData> result= new List<FileData>();
             foreach(FileMap fileMap in 
-                _fileMap.GetSubFileMap(currentFolder.Name).SubFiles.Where(f => string.IsNullOrEmpty(f.FileData.LName)))
+                _fileMap.GetSubFileMap(currentFolder).SubFiles.Where(f => string.IsNullOrEmpty(f.FileData.LName)))
             {
                 var lFileName = RetrieveLyricsForAnMFile(fileMap.FileData.Name);
                 if (!string.IsNullOrEmpty(lFileName))
@@ -75,49 +75,7 @@ namespace MIndexer.Core
             return string.Format("{0}.{1}", mFileName.Replace(_mRootFolder, lRootCalculatedFolder), _lExtentionsFilter[0]);
         }
 
-        private readonly string rootUrl = "http://www.songlyrics.com/";
-
-        public virtual string DownloadLyrics(string relativeUrl)
-        {
-            string result = string.Empty;
-            if (string.IsNullOrEmpty(relativeUrl))
-                throw new ArgumentNullException("relativeUrl");
-            try
-            {
-                HttpWebRequest httpWebRequest =
-                    (HttpWebRequest)WebRequest.Create(string.Format("{0}{1}", rootUrl, relativeUrl));
-                WebResponse myResponse = httpWebRequest.GetResponse();
-                StreamReader sr = new StreamReader(myResponse.GetResponseStream());
-                result = ScrapLyrics(sr.ReadToEnd());
-                sr.Close();
-                myResponse.Close();
-            }
-            catch (Exception ex)
-            {
-                LoggingManager.LogSciendoSystemError(ex);
-            }
-            return result;
-        }
-
-        public string ScrapLyrics(string pageContent)
-        {
-            int startOfDiv = pageContent.IndexOf(@"id=""songLyricsDiv""");
-            int startOfText = pageContent.IndexOf(@">", startOfDiv) + 1;
-            int stopOfText = pageContent.IndexOf(@"</p>", startOfDiv);
-            var rawLyrics = pageContent.Substring(startOfText, stopOfText - startOfText);
-            rawLyrics = rawLyrics.Replace(@"<br />", " ");
-
-            return ConvertFromASCII(rawLyrics).Replace("\r", "").Replace("\n", "");
-        }
-
-        public string ConvertFromASCII(string rawLyrics)
-        {
-            for (int i = 0; i < 256; i++)
-                rawLyrics = rawLyrics.Replace("&#" + i + ";", Convert.ToString((char)i));
-            return rawLyrics;
-        }
-
-        private string RetrieveLyricsForAnMFile(string filePath)
+        internal string RetrieveLyricsForAnMFile(string filePath)
         {
             string[] mExtentions = IOHelper.GetMExtentions();
 
@@ -131,15 +89,10 @@ namespace MIndexer.Core
                     if (!string.IsNullOrEmpty(lyricsFolder))
                         if (!Directory.Exists(lyricsFolder))
                             Directory.CreateDirectory(lyricsFolder);
-                    Lyrics lyrics = new Lyrics();
-                    var id3Tag = _tagReaderHelper.GetID3Tag(filePath);
-                    if (id3Tag == null)
+                    ContentAndTarget content = _contentProvider.GetContentAndTarget(filePath);
+                    if (content==null || string.IsNullOrEmpty(content.Content))
                         return null;
-                    lyrics.Content = DownloadLyrics(GetRelativeUrl(id3Tag));
-                    if (string.IsNullOrEmpty(lyrics.Content))
-                        return null;
-                    lyrics.TargetFileName = filePath;
-                    Serializer.SerializeOneToFile(lyrics, lyricsFilePath);
+                    Serializer.SerializeOneToFile(content, lyricsFilePath);
                     return lyricsFilePath;
                 }
                 catch (Exception ex)
@@ -149,13 +102,6 @@ namespace MIndexer.Core
                 }
             }
             return null;
-        }
-
-        private string GetRelativeUrl(ID3Tag id3Tag)
-        {
-            if (!id3Tag.HasTitle || !id3Tag.HasArtist)
-                return null;
-            return string.Format("{0}/{1}-lyrics/", id3Tag.Artist.Replace(" ", "-").Replace("/", ""), id3Tag.Title.Replace(" ", "-"));
         }
 
     }

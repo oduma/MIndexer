@@ -5,12 +5,14 @@ using CommandLine;
 using CommandLine.Text;
 using MIndexer.Core;
 using MIndexer.Core.DataTypes;
+using MIndexer.Core.IndexMaintainers;
+using MIndexer.Core.Interfaces;
 using Sciendo.Common.Logging;
 using Sciendo.Common.Serialization;
 
 namespace MIndexer.Builder
 {
-    class Program
+    public class Program
     {
         internal static readonly HeadingInfo headingInfo =
             new HeadingInfo(System.Reflection.Assembly.GetExecutingAssembly().GetName().Name,
@@ -26,7 +28,7 @@ namespace MIndexer.Builder
                 if (!string.IsNullOrEmpty(options.UseMap))
                     CreateNewMap(options.StartFromFolder, options.CreateNewMap);
                 else
-                    ProcessMap(options.StartFromFolder, options.UseMap);
+                    ProcessMap(options.StartFromFolder, options.LyricsRootFolder, options.UseMap);
             }
             else
             {
@@ -36,16 +38,33 @@ namespace MIndexer.Builder
 
         }
 
-        private static void ProcessMap(string startFromFolder, string outputFile)
+        public static void ProcessMap(string startFromFolder, string outputFile, string lRootFolder)
         {
             BulkFileProcessor bulkFileProcessor= new BulkFileProcessor();
-            DownloadAndIndexFromMapRequest downloadAndIndexFromMapRequest= new DownloadAndIndexFromMapRequest();
+            IContentProvider tagReaderHelper= new MContentProvider();
+            FileMap fileMap= Serializer.DeserializeOneFromFile<FileMap>(outputFile);
+            DownloadManager downloadManager = new DownloadManager(startFromFolder, lRootFolder,
+                                                                   new string[] {".lyrics"}, tagReaderHelper, fileMap);
+            IContentProvider contentProvider=new LContentProviderLocal();
+            IIndexManager indexManager= new LIndexManager(contentProvider);
+            DownloadAndIndexFromMapRequest downloadAndIndexFromMapRequest = new DownloadAndIndexFromMapRequest
+                                                                                {
+                                                                                    DownloadManager = downloadManager,
+                                                                                    FileMap = fileMap,
+                                                                                    IndexMaintainer = indexManager
+                                                                                };
             Task lyricsTask= new Task(bulkFileProcessor.ProcessLFilesFromMapThreaded,downloadAndIndexFromMapRequest );
-            IndexFromMapRequest indexFromMapRequest= new IndexFromMapRequest();
+            IIndexManager mIndexManager= new MIndexManager(tagReaderHelper);
+            IndexFromMapRequest indexFromMapRequest = new IndexFromMapRequest
+                                                          {FileMap = fileMap, IndexMaintainer = mIndexManager};
             Task musicTask = new Task(bulkFileProcessor.ProcessMFilesFromMapThreaded, indexFromMapRequest);
+            lyricsTask.Start();
+            musicTask.Start();
+            musicTask.Wait();
+            lyricsTask.Wait();
         }
 
-        private static FileMap CreateNewMap(string rootFolder, string mapFileName)
+        public static FileMap CreateNewMap(string rootFolder, string mapFileName)
         {
             FileMapBuilder fileMapBuilder=new FileMapBuilder();
             fileMapBuilder.FileMapBuildProgress += new EventHandler<FileMapBuildProgressEventArgs>(fileMapBuilder_FileMapBuildProgress);

@@ -4,6 +4,6 @@ namespace MIndexer.Core.DataTypes
 {
     public class DownloadAndIndexFromMapRequest:IndexFromMapRequest
     {
-        public IDownloadManager DownloadManager { get; set; }
+        public DownloadManager DownloadManager { get; set; }
     }
 }

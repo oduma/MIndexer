@@ -27,24 +27,15 @@ namespace MIndexer.Tests
         [Test]
         public void BulkFileProcessorProcessLFilesFromMapOk()
         {
-            ITagReaderHelper tagReaderHelper = TestHelper.GetMockTagReader(new Dictionary<string, ID3Tag>
+            IContentProvider contentProvider = TestHelper.GetMockContentProvider(new Dictionary<string,ContentAndTarget>
                                       {
-                                          {"Input\\RootFolder\\FileInRoot.mp3", new ID3v2Tag{Artist="a1",Title="t1"}},
-                                          {@"Input\RootFolder\Folder1\File1InFolder1.ogg", new ID3v2Tag{Artist="a1",Title="t2"}},
-                                          {@"Input\RootFolder\Folder1\File2InFolder1.mp3", new ID3v2Tag{Artist="a1",Title="t3"}},
-                                          {@"Input\RootFolder\Folder1\Folder2\File1InFolder2.mp3", new ID3v2Tag{Artist="a1",Title="t4"}},
-                                          {@"Input\RootFolder\Folder1\Folder2\File2InFolder2.flac", new ID3v2Tag{Artist="a1",Title="t5"}}
+                                          {"Input\\RootFolder\\FileInRoot.mp3", new ContentAndTarget{Content= "lyrics1",TargetFileName= "Input\\RootFolder\\FileInRoot.mp3"}},
+                                          {@"Input\RootFolder\Folder1\File1InFolder1.ogg", new ContentAndTarget{Content= "lyrics2",TargetFileName= @"Input\RootFolder\Folder1\File1InFolder1.ogg"}},
+                                          {@"Input\RootFolder\Folder1\File2InFolder1.mp3", new ContentAndTarget{Content= "lyrics3",TargetFileName= @"Input\RootFolder\Folder1\File2InFolder1.mp3"}},
+                                          {@"Input\RootFolder\Folder1\Folder2\File1InFolder2.mp3", new ContentAndTarget{Content= "lyrics4",TargetFileName= @"Input\RootFolder\Folder1\Folder2\File1InFolder2.mp3"}},
+                                          {@"Input\RootFolder\Folder1\Folder2\File2InFolder2.flac", new ContentAndTarget{Content= "lyrics5",TargetFileName= @"Input\RootFolder\Folder1\Folder2\File2InFolder2.flac"}}
                                       });
             FileMap fileMap = Serializer.DeserializeOneFromFile<FileMap>(@"Input\map.xml");
-            IDownloadManager downloadManager =
-                GetMockDownloader(new Dictionary<string, string>
-                                      {
-                                          {"a1/t1-lyrics/", "lyrics1"},
-                                          {"a1/t2-lyrics/", "lyrics2"},
-                                          {"a1/t3-lyrics/", "lyrics3"},
-                                          {"a1/t4-lyrics/", "lyrics4"},
-                                          {"a1/t5-lyrics/", "lyrics5"}
-                                      }, "Input", "Lyrics", new string[] { "lyrics" }, tagReaderHelper, fileMap);
             BulkFileProcessor bulkFileProcessor = new BulkFileProcessor();
             IIndexManager lIndexManager = TestHelper.GetMockIndexManager(new Dictionary<string, bool>
                                                                                       {
@@ -69,6 +60,7 @@ namespace MIndexer.Tests
                                                                                               , true
                                                                                               }
                                                                                       });
+            DownloadManager downloadManager= new DownloadManager(@"Input\RootFolder",@"Lyrics",new string[]{"lyrics"},contentProvider,fileMap);
             bulkFileProcessor.ProcessLFilesFromMap(fileMap, downloadManager, lIndexManager);
             Assert.IsNotNull(fileMap);
             TestHelper.ValidateFiles(
@@ -88,18 +80,6 @@ namespace MIndexer.Tests
             }, fileMap.SubFiles.First(s => s.FileData.IsFolder).SubFiles.First(f => f.FileData.IsFolder).
                                SubFiles.Where(e => !e.FileData.IsFolder).ToList(), true);
 
-        }
-
-        private IDownloadManager GetMockDownloader(Dictionary<string, string> inOuts, object ctorArg1, object ctorArg2, object ctorArg3, object ctorArg4, object ctorArg5)
-        {
-            Mock<DownloadManager> mockDownloaderHelper = new Mock<DownloadManager>(ctorArg1, ctorArg2, ctorArg3,
-                                                                                     ctorArg4, ctorArg5);
-            foreach (string key in inOuts.Keys)
-            {
-                string key1 = key;
-                mockDownloaderHelper.Setup(m => m.DownloadLyrics(key1)).Returns(inOuts[key1]);
-            }
-            return mockDownloaderHelper.Object;
         }
 
         [Test]
@@ -123,7 +103,7 @@ namespace MIndexer.Tests
         public void BulkFileProcessorProcessLFilesFromMapNoIndexMaintainerSent()
         {
             BulkFileProcessor BulkFileProcessor = new BulkFileProcessor();
-            BulkFileProcessor.ProcessLFilesFromMap(new FileMap(), new DownloadManager("Input", "Lyrics", new string[] { "abc" }, new TagReaderHelper(), new FileMap()), null);
+            BulkFileProcessor.ProcessLFilesFromMap(new FileMap(), new DownloadManager("Input", "Lyrics", new string[] { "abc" }, new MContentProvider(), new FileMap()), null);
         }
 
         [Test]

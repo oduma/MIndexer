@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ID3Sharp;
+using MIndexer.Core;
 using MIndexer.Core.DataTypes;
 using MIndexer.Core.IndexMaintainers;
 using MIndexer.Core.Interfaces;
@@ -24,6 +26,22 @@ namespace MIndexer.Tests
             {
                 Assert.False(actualFiles.Any(s => s.FileData.LState != State.Indexed));
                 Assert.AreEqual(expectedFiles.Length, actualFiles.Count(f => expectedFiles.Contains(f.FileData.LName)));
+            }
+        }
+
+        public static void ValidateFiles(string[] expectedFiles, List<FileData> actualFiles, bool isLFile = false, State state = State.NotTouched)
+        {
+            Assert.AreEqual(expectedFiles.Length, actualFiles.Count);
+            Assert.False(actualFiles.Any(f => f.IsFolder));
+            if (!isLFile)
+            {
+                Assert.False(actualFiles.Any(s => s.State != state));
+                Assert.AreEqual(expectedFiles.Length, actualFiles.Count(f => expectedFiles.Contains(f.Name)));
+            }
+            else
+            {
+                Assert.False(actualFiles.Any(s => s.LState != state));
+                Assert.AreEqual(expectedFiles.Length, actualFiles.Count(f => expectedFiles.Contains(f.LName)));
             }
         }
 
@@ -62,18 +80,26 @@ namespace MIndexer.Tests
             return indexManager.Object;
         }
 
-        public static ITagReaderHelper GetMockTagReader(Dictionary<string, ID3Tag> inOuts)
+        public static IContentProvider GetMockContentProvider(Dictionary<string, ContentAndTarget> inOuts)
         {
-            Mock<ITagReaderHelper> tagReaderHelper = new Mock<ITagReaderHelper>(MockBehavior.Default);
-            tagReaderHelper.CallBase = false;
+            Mock<IContentProvider> mockContentProvider = new Mock<IContentProvider>();
             foreach (string key in inOuts.Keys)
             {
                 string key1 = key;
-                var val1 = inOuts[key1];
-                tagReaderHelper.Setup(m => m.GetID3Tag(key1)).Returns(val1);
+                mockContentProvider.Setup(m => m.GetContentAndTarget(key1)).Returns(inOuts[key1]);
             }
-            return tagReaderHelper.Object;
+            return mockContentProvider.Object;
+        }
 
+        public static IContentProvider GetMockContentProviderWithEx(List<string> ins)
+        {
+            Mock<IContentProvider> mockContentProvider = new Mock<IContentProvider>();
+            foreach (string key in ins)
+            {
+                string key1 = key;
+                mockContentProvider.Setup(m => m.GetContentAndTarget(key1)).Throws(new Exception());
+            }
+            return mockContentProvider.Object;
         }
 
 
